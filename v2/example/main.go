@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/wallet-manager/treemap/v2"
+	"github.com/wallet-manager/go-treemap/v2"
 )
 
 func main() {
