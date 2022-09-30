@@ -1,4 +1,4 @@
-module github.com/igrmk/treemap/v2
+module github.com/wallet-manager/treemap/v2
 
 go 1.18
 
