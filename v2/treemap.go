@@ -4,26 +4,26 @@
 //
 // Example:
 //
-//     package main
+//	package main
 //
-//     import (
-//         "fmt"
+//	import (
+//	    "fmt"
 //
-//         "github.com/igrmk/treemap/v2"
-//     )
+//	    "github.com/igrmk/treemap/v2"
+//	)
 //
-//     func main() {
-//         tree := treemap.New[int, string]()
-//         tree.Set(1, "World")
-//         tree.Set(0, "Hello")
-//         for it := tree.Iterator(); it.Valid(); it.Next() {
-//             fmt.Println(it.Key(), it.Value())
-//         }
-//     }
+//	func main() {
+//	    tree := treemap.New[int, string]()
+//	    tree.Set(1, "World")
+//	    tree.Set(0, "Hello")
+//	    for it := tree.Iterator(); it.Valid(); it.Next() {
+//	        fmt.Println(it.Key(), it.Value())
+//	    }
+//	}
 //
-//     // Output:
-//     // 0 Hello
-//     // 1 World
+//	// Output:
+//	// 0 Hello
+//	// 1 World
 package treemap
 
 import "golang.org/x/exp/constraints"
@@ -363,8 +363,9 @@ func (t *TreeMap[Key, Value]) insertFixup(x *node[Key, Value]) {
 	}
 }
 
+// noinspection GoNilness
+//
 //nolint:gocyclo
-//noinspection GoNilness
 func removeNode[Key, Value any](
 	root, z *node[Key, Value],
 ) {
@@ -505,22 +506,31 @@ type ForwardIterator[Key, Value any] struct {
 
 // Valid reports if the iterator position is valid.
 // In other words it returns true if an iterator is not at the one-past-the-end position.
-func (i ForwardIterator[Key, Value]) Valid() bool { return i.node != i.tree.endNode }
+func (i ForwardIterator[Key, Value]) Valid() bool {
+	return i.node != i.tree.endNode && i.node != nil
+}
 
 // Next moves an iterator to the next element.
 // It panics if it goes out of bounds.
 func (i *ForwardIterator[Key, Value]) Next() {
-	if i.node == i.tree.endNode {
+	if i.node == nil {
+		i.node = i.tree.beginNode
+	} else if i.node != i.tree.endNode {
+		i.node = successor(i.node)
+		if i.node == nil {
+			i.node = i.tree.endNode
+		}
+	} else {
 		panic("out of bound iteration")
 	}
-	i.node = successor(i.node)
 }
 
 // Prev moves an iterator to the previous element.
 // It panics if it goes out of bounds.
 func (i *ForwardIterator[Key, Value]) Prev() {
-	i.node = predecessor(i.node)
-	if i.node == nil {
+	if i.node != nil {
+		i.node = predecessor(i.node)
+	} else {
 		panic("out of bound iteration")
 	}
 }
@@ -541,26 +551,29 @@ type ReverseIterator[Key, Value any] struct {
 
 // Valid reports if the iterator position is valid.
 // In other words it returns true if an iterator is not at the one-before-the-start position.
-func (i ReverseIterator[Key, Value]) Valid() bool { return i.node != nil }
+func (i ReverseIterator[Key, Value]) Valid() bool { return i.node != nil && i.node != i.tree.endNode }
 
 // Next moves an iterator to the next element in reverse order.
 // It panics if it goes out of bounds.
 func (i *ReverseIterator[Key, Value]) Next() {
-	if i.node == nil {
+	if i.node != nil {
+		i.node = predecessor(i.node)
+	} else {
 		panic("out of bound iteration")
 	}
-	i.node = predecessor(i.node)
 }
 
 // Prev moves an iterator to the previous element in reverse order.
 // It panics if it goes out of bounds.
 func (i *ReverseIterator[Key, Value]) Prev() {
-	if i.node != nil {
-		i.node = successor(i.node)
-	} else {
+	if i.node == nil {
 		i.node = i.tree.beginNode
-	}
-	if i.node == i.tree.endNode {
+	} else if i.node != i.tree.endNode {
+		i.node = successor(i.node)
+		if i.node == nil {
+			i.node = i.tree.endNode
+		}
+	} else {
 		panic("out of bound iteration")
 	}
 }

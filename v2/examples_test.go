@@ -91,10 +91,30 @@ func ExampleTreeMap_Range() {
 	tr.Set(1, "one")
 	tr.Set(2, "two")
 	tr.Set(3, "three")
-	for it, end := tr.Range(1, 2); it != end; it.Next() {
+	for it, end := tr.Range(1, 3); it != end; it.Next() {
 		fmt.Println(it.Key(), "-", it.Value())
 	}
+
 	// Output:
 	// 1 - one
 	// 2 - two
+	// 3 - three
+}
+
+func ExampleTreeMap_UpperBound() {
+	tr := New[int, string]()
+	tr.Set(1, "one")
+	tr.Set(2, "two")
+	tr.Set(3, "three")
+
+	it := tr.UpperBound(2)
+
+	for it.Prev(); it.Valid(); it.Prev() {
+		fmt.Println(it.Key(), "-", it.Value())
+	}
+
+	// Output:
+	// 2 - two
+	// 1 - one
+
 }
